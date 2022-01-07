@@ -1,26 +1,27 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { LogOut } from "../functions/LogOut";
+import { MainContainer } from "../components/MainContainer";
 
 const Container = styled.div`
-  background-color: #ecf0f1;
-  width: 80%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 18px;
 `;
 
 const MainPage = () => {
-  const navigate = useNavigate();
   return (
-    <Container>
-      <button
-        onClick={() => {
-          LogOut();
-          navigate(0);
-        }}
-      >
-        dffd
-      </button>
-    </Container>
+    <MainContainer>
+      <Container>
+        <div>
+          <p>Siffer 관리자 페이지 입니다.</p>
+          <p>왼쪽의 메뉴를 클릭해 이동해주세요.</p>
+        </div>
+      </Container>
+    </MainContainer>
   );
 };
 
