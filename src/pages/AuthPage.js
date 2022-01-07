@@ -6,6 +6,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import axios from "axios";
 import { API } from "../libs/consts";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   width: 100%;
@@ -45,6 +46,7 @@ const Container = styled.div`
 const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const nativate = useNavigate();
 
   const login = async () => {
     try {
@@ -54,9 +56,13 @@ const AuthPage = () => {
       });
       const {
         status,
-        data: { access_token, refresh_token, user },
+        data: { access_token, refresh_token },
       } = response;
-      console.log(status, user, access_token, refresh_token);
+      if (status === 200) {
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("refresh_token", refresh_token);
+        nativate(0);
+      }
     } catch (error) {
       if (error.message === "Request failed with status code 400") {
         console.log("이메일 혹은 비밀번호가 틀립니다.");
@@ -70,7 +76,6 @@ const AuthPage = () => {
         <span className="logo">
           <RiAdminLine />
           Siffer 관리자 페이지
-          <MdOutlineManageAccounts />
         </span>
         <span className="form">
           <Input
@@ -83,6 +88,11 @@ const AuthPage = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                login();
+              }
+            }}
           />
         </span>
         <span className="buttons">
