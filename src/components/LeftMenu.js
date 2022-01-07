@@ -1,5 +1,4 @@
 import React from "react";
-import { MdOutlineManageAccounts } from "react-icons/md";
 import { RiAdminLine } from "react-icons/ri";
 import { FiLogOut } from "react-icons/fi";
 import styled from "styled-components";
@@ -24,6 +23,7 @@ const Container = styled.div`
     align-items: center;
     font-size: 24px;
     column-gap: 10px;
+    cursor: pointer;
   }
   .logout {
     background-color: #34495e;
@@ -62,28 +62,54 @@ const Container = styled.div`
   .logout:hover {
     background-color: #2c3e50;
   }
+  #${(props) => props.location} {
+    color: whitesmoke;
+  }
 `;
 
 const LeftMenu = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  console.log(location.pathname);
-
+  const here = location.pathname.slice(1);
   return (
-    <Container>
-      <span className="logo">
+    <Container location={here}>
+      <span className="logo" onClick={() => navigate("/")}>
         <RiAdminLine />
         Siffer 관리자 페이지
       </span>
       <div className="menus">
         <span className="title">Borderless</span>
-        <span className="link">유저 관리</span>
-        <span className="link">상품 관리</span>
-        <span className="link">주문 관리</span>
+        <span className="link" id="users" onClick={() => navigate("/users")}>
+          유저 관리
+        </span>
+        <span
+          className="link"
+          id="products"
+          onClick={() => navigate("/products")}
+        >
+          상품 관리
+        </span>
+        <span className="link" id="orders" onClick={() => navigate("/orders")}>
+          주문 관리
+        </span>
         <span className="title">Siffer API 학습</span>
-        <span className="link">웹 크롤링 학습</span>
-        <span className="link">OCR 학습</span>
-        <span className="link">상품 DB 축적</span>
+        <span
+          className="link"
+          id="crawling"
+          onClick={() => navigate("/crawling")}
+        >
+          웹 크롤링 학습
+        </span>
+        <span className="link" id="ocr" onClick={() => navigate("/ocr")}>
+          OCR 학습
+        </span>
+        <span
+          className="link"
+          id="productsdb"
+          onClick={() => navigate("/productsdb")}
+        >
+          상품 DB 축적
+        </span>
       </div>
       <div
         className="logout"
