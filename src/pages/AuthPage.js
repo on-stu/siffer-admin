@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { RiAdminLine } from "react-icons/ri";
-import { MdOutlineManageAccounts } from "react-icons/md";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import axios from "axios";
