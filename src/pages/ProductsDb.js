@@ -1,10 +1,11 @@
 import React from "react";
+import { MainContainer } from "../components/MainContainer";
 
 const ProductsDb = () => {
   return (
-    <div>
+    <MainContainer>
       <h1>products db</h1>
-    </div>
+    </MainContainer>
   );
 };
 

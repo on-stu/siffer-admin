@@ -1,10 +1,11 @@
 import React from "react";
+import { MainContainer } from "../components/MainContainer";
 
 const OcrPage = () => {
   return (
-    <div>
+    <MainContainer>
       <h1>ocrpage</h1>
-    </div>
+    </MainContainer>
   );
 };
 

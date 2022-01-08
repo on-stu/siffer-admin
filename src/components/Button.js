@@ -1,8 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
-const Button = ({ children, onClick }) => {
-  return <StyledButton onClick={onClick}>{children}</StyledButton>;
+const Button = ({ children, onClick, backColor }) => {
+  return (
+    <StyledButton backColor={backColor} onClick={onClick}>
+      {children}
+    </StyledButton>
+  );
 };
 
 const StyledButton = styled.button`
@@ -12,7 +16,8 @@ const StyledButton = styled.button`
   border-radius: 10px;
   border: none;
   outline: none;
-  background-color: #3498db;
+  background-color: ${(props) =>
+    props.backColor ? props.backColor : "#3498db"};
   color: white;
   cursor: pointer;
   :active {

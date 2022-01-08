@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
@@ -9,6 +9,10 @@ import { MainContainer } from "../components/MainContainer";
 import TextArea from "../components/TextArea";
 import ToggleButton from "../components/ToggleButton";
 import Button from "../components/Button";
+import axios from "axios";
+import { API } from "../libs/consts";
+import { useNavigate } from "react-router-dom";
+import { constructTable } from "../functions/constructTable";
 
 const ListContainer = styled.div`
   width: 20%;
@@ -49,25 +53,118 @@ const Container = styled.div`
 const CrawlingPage = () => {
   const sites = useSelector((state) => state.site);
   const dispatch = useDispatch();
+
+  const resultRef = useRef();
+  const navigate = useNavigate();
+
   const token = localStorage.getItem("access_token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  };
 
   const [sitename, setSitename] = useState("");
-  const [encoding, setEncoding] = useState("");
+  const [encoding, setEncoding] = useState("utf-8");
+  const [className, setClassName] = useState("");
   const [match, setMatch] = useState("");
   const [url, setUrl] = useState("");
   const [instruction, setInstruction] = useState("");
   const [isIframe, setIsIframe] = useState(false);
   const [status, setStatus] = useState(false);
-
   const [currentSite, setCurrentSite] = useState();
+
+  const [testUrl, setTestUrl] = useState("");
+
+  const addSite = async () => {
+    if (encoding !== "utf-8" && encoding !== "euc-kr") {
+      return alert("encoding은 utf-8 혹은 euc-kr로 설정되어야 합니다.");
+    }
+    const response = await axios.post(
+      `${API}/api/site/`,
+      {
+        sitename,
+        iframe: isIframe,
+        match,
+        url,
+        instruction,
+        encoding,
+        classname: className,
+        status: status ? "success" : "failed",
+      },
+      config
+    );
+    if (response.status === 201) {
+      navigate(0);
+    }
+  };
+
+  const modifySite = async () => {
+    if (encoding !== "utf-8" && encoding !== "euc-kr") {
+      return alert("encoding은 utf-8 혹은 euc-kr로 설정되어야 합니다.");
+    }
+    const response = await axios.put(
+      `${API}/api/site/${sites[currentSite]?.id}/`,
+      {
+        sitename,
+        iframe: isIframe,
+        match,
+        url,
+        instruction,
+        classname: className,
+        encoding,
+        status: status ? "success" : "failed",
+      },
+      config
+    );
+    if (response.status === 200) {
+      dispatch(getSiteInfo(token));
+    }
+  };
+
+  const deleteSite = async () => {
+    const response = await axios.delete(
+      `${API}/api/site/${sites[currentSite]?.id}/`,
+      config
+    );
+
+    if (response.status === 204) {
+      dispatch(getSiteInfo(token));
+    }
+  };
+
+  const testGetSize = async () => {
+    const response = await axios.post(
+      `${API}/api/getsize/`,
+      {
+        url: testUrl,
+      },
+      config
+    );
+    console.log(response);
+    resultRef.current.innerText = "";
+    if (response.status == 200) {
+      constructTable(response.data.result, resultRef.current);
+    }
+  };
+
+  const setSiteInput = (siteInfo) => {
+    setSitename(siteInfo.sitename);
+    setEncoding(siteInfo.encoding);
+    setIsIframe(siteInfo.iframe);
+    setInstruction(siteInfo.instruction);
+    setClassName(siteInfo.classname);
+    setMatch(siteInfo.match);
+    setStatus(siteInfo.status === "success" ? true : false);
+    setUrl(siteInfo.url);
+  };
 
   useEffect(() => {
     dispatch(getSiteInfo(token));
-  }, []);
+  }, [dispatch, token]);
 
-  useEffect(() => {
-    console.log(currentSite, sites[currentSite]?.sitename);
-  }, [currentSite]);
   return (
     <MainContainer>
       <ListContainer>
@@ -87,8 +184,9 @@ const CrawlingPage = () => {
               setSitename("");
               setUrl("");
               setMatch("");
-              setEncoding("");
+              setEncoding("utf-8");
               setInstruction("");
+              setClassName("");
               setIsIframe(false);
               setStatus(false);
             }}
@@ -97,16 +195,20 @@ const CrawlingPage = () => {
           </span>
         </span>
 
-        {sites.map((site, i) => {
-          return (
-            <ListItem
-              title={site.sitename}
-              key={i}
-              status={site.status}
-              onClick={() => setCurrentSite(i)}
-            />
-          );
-        })}
+        {sites &&
+          sites.map((site, i) => {
+            return (
+              <ListItem
+                title={site.sitename}
+                key={i}
+                status={site.status}
+                onClick={() => {
+                  setCurrentSite(i);
+                  setSiteInput(site);
+                }}
+              />
+            );
+          })}
       </ListContainer>
       <Container>
         {currentSite || currentSite === 0 ? (
@@ -115,7 +217,7 @@ const CrawlingPage = () => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(4, 1fr)",
                 columnGap: "10px",
               }}
             >
@@ -133,6 +235,11 @@ const CrawlingPage = () => {
                 placeholder="match"
                 value={match}
                 onChange={(e) => setMatch(e.target.value)}
+              />
+              <Input
+                placeholder="class name"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
               />
             </div>
             <Input
@@ -164,12 +271,17 @@ const CrawlingPage = () => {
                   {status ? "성공" : "실패"}
                 </ToggleButton>
               </span>
+              <Button backColor={"#E74B3C"} onClick={deleteSite}>
+                삭제
+              </Button>
               <Button
                 onClick={() => {
+                  setCurrentSite();
                   setSitename("");
                   setUrl("");
                   setMatch("");
-                  setEncoding("");
+                  setEncoding("utf-8");
+                  setClassName("");
                   setInstruction("");
                   setIsIframe(false);
                   setStatus(false);
@@ -177,7 +289,7 @@ const CrawlingPage = () => {
               >
                 취소
               </Button>
-              <Button>수정</Button>
+              <Button onClick={modifySite}>수정</Button>
             </div>
           </div>
         ) : (
@@ -186,7 +298,7 @@ const CrawlingPage = () => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(4, 1fr)",
                 columnGap: "10px",
               }}
             >
@@ -204,6 +316,11 @@ const CrawlingPage = () => {
                 placeholder="match"
                 value={match}
                 onChange={(e) => setMatch(e.target.value)}
+              />
+              <Input
+                placeholder="class name"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
               />
             </div>
             <Input
@@ -240,21 +357,26 @@ const CrawlingPage = () => {
                   setSitename("");
                   setUrl("");
                   setMatch("");
-                  setEncoding("");
+                  setEncoding("utf-8");
                   setInstruction("");
+                  setClassName("");
                   setIsIframe(false);
                   setStatus(false);
                 }}
               >
                 취소
               </Button>
-              <Button>추가</Button>
+              <Button onClick={addSite}>추가</Button>
             </div>
           </div>
         )}
         <div className="test">
           <span className="title">테스트</span>
-          <Input placeholder={"상품 url"} />
+          <Input
+            placeholder={"상품 url"}
+            value={testUrl}
+            onChange={(e) => setTestUrl(e.target.value)}
+          />
           <span
             style={{
               width: "100%",
@@ -262,8 +384,9 @@ const CrawlingPage = () => {
               justifyContent: "flex-end",
             }}
           >
-            <Button>Go</Button>
+            <Button onClick={testGetSize}>Go</Button>
           </span>
+          <table ref={resultRef}></table>
         </div>
       </Container>
     </MainContainer>

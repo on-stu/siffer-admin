@@ -1,10 +1,11 @@
 import React from "react";
+import { MainContainer } from "../components/MainContainer";
 
 const OrdersPage = () => {
   return (
-    <div>
+    <MainContainer>
       <h1>orders page</h1>
-    </div>
+    </MainContainer>
   );
 };
 
