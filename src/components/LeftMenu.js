@@ -78,7 +78,7 @@ const LeftMenu = () => {
         Siffer 관리자 페이지
       </span>
       <div className="menus">
-        <span className="title">Borderless</span>
+        <span className="title">쇼핑몰 관리</span>
         <span className="link" id="users" onClick={() => navigate("/users")}>
           유저 관리
         </span>

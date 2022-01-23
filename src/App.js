@@ -15,24 +15,37 @@ import ProductsDb from "./pages/ProductsDb";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const token = localStorage.getItem("token");
   const getIsLoggedIn = async (token) => {
     try {
-      await axios.post(`${API}/api/token/verify/`, { token }).then((res) => {
-        console.log(res);
-        if (res.status === 200) {
-          setIsLoggedIn(true);
-        }
-      });
+      await axios
+        .get(`${API}/api/user/`, {
+          withCredentials: true,
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          if (res.status === 200) {
+            setIsLoggedIn(true);
+          }
+        });
     } catch (error) {
-      if (error.response.status === 401 || error.response.status === 400) {
+      if (
+        error.response.status === 401 ||
+        error.response.status === 400 ||
+        error.response.status
+      ) {
         console.log("not authorized");
         setIsLoggedIn(false);
       }
     }
   };
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
 
+  useEffect(() => {
+    axios.defaults.withCredentials = true;
+    console.log(token);
     getIsLoggedIn(token);
   });
   return (

@@ -6,7 +6,7 @@ export const getSiteInfo = (token) => async (dispatch) => {
   try {
     const config = {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Token ${token}`,
       },
     };
     const response = await axios.get(`${API}/api/site/`, config);

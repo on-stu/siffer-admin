@@ -57,10 +57,10 @@ const CrawlingPage = () => {
   const resultRef = useRef();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   const config = {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Token ${token}`,
       Accept: "application/json",
       "Content-Type": "application/json",
     },

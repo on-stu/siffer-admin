@@ -45,25 +45,32 @@ const Container = styled.div`
 const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const nativate = useNavigate();
+  const navigate = useNavigate();
 
   const login = async () => {
     try {
-      const response = await axios.post(`${API}/accounts/login/`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${API}/api/login/`,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
       const {
         status,
-        data: { access_token, refresh_token },
+        data: { token },
       } = response;
       if (status === 200) {
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
-        nativate(0);
+        localStorage.setItem("token", token);
+        navigate("/");
+        navigate(0);
       }
     } catch (error) {
-      if (error.message === "Request failed with status code 400") {
+      if (
+        error.message === "Request failed with status code 400" ||
+        error.response.status === 403
+      ) {
         console.log("이메일 혹은 비밀번호가 틀립니다.");
       }
     }
